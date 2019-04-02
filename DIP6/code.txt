@@ -1,0 +1,106 @@
+%1-产生高斯噪声并恢复
+>> clear
+>> lena = im2double(imread('lena.bmp'));
+>> gaus1 = imnoise(lena,'gaussian',0,0.1);
+>> gaus2 = imnoise(lena,'gaussian',0,0.2);
+>> gaus3 = imnoise(lena,'gaussian',0.1,0);
+>> gaus4 = imnoise(lena,'gaussian',0.1,0.1);
+>> gaus5 = imnoise(lena,'gaussian',0.2,0.1);
+>> figure; subplot(2,3,1);imshow(lena);title('源图像'); subplot(2,3,2);imshow(gaus1);title('m=0,v=0.1'); subplot(2,3,3);imshow(gaus2);title('m=0,v=0.2'); subplot(2,3,4);imshow(gaus3);title('m=0.1,v=0'); subplot(2,3,5);imshow(gaus4);title('m=0.1,v=0.1'); subplot(2,3,6);imshow(gaus5);title('m=0.2,v=0.1'); saveas(gcf,'gauss.bmp');
+>> 
+>> %算术均值滤波
+>> aver1 = imfilter(gaus1,fspecial('average',[5,5]));
+>> aver2 = imfilter(gaus2,fspecial('average',[5,5]));
+>> aver3 = imfilter(gaus3,fspecial('average',[5,5]));
+>> aver4 = imfilter(gaus4,fspecial('average',[5,5]));
+>> aver5 = imfilter(gaus5,fspecial('average',[5,5]));
+>> figure; subplot(2,3,1);imshow(lena);title('源图像'); subplot(2,3,2);imshow(aver1);title('m=0,v=0.1 恢复效果'); subplot(2,3,3);imshow(aver2);title('m=0,v=0.2 恢复效果'); subplot(2,3,4);imshow(aver3);title('m=0.1,v=0 恢复效果'); subplot(2,3,5);imshow(aver4);title('m=0.1,v=0.1 恢复效果'); subplot(2,3,6);imshow(aver5);title('m=0.2,v=0.1 恢复效果'); saveas(gcf,'gauss_aver.bmp');
+>> %
+>> %几何均值滤波
+>> geom1 = real(exp(imfilter(log(gaus1+0.1),fspecial('average',[5,5]),'replicate')))-0.1;
+>> geom2 = real(exp(imfilter(log(gaus2+0.1),fspecial('average',[5,5]),'replicate')))-0.1;
+>> geom3 = real(exp(imfilter(log(gaus3+0.1),fspecial('average',[5,5]),'replicate')))-0.1;
+>> geom4 = real(exp(imfilter(log(gaus4+0.1),fspecial('average',[5,5]),'replicate')))-0.1;
+>> geom5 = real(exp(imfilter(log(gaus5+0.1),fspecial('average',[5,5]),'replicate')))-0.1;
+>> figure; subplot(2,3,1);imshow(lena);title('源图像'); subplot(2,3,2);imshow(geom1);title('m=0,v=0.1 恢复效果'); subplot(2,3,3);imshow(geom2);title('m=0,v=0.2 恢复效果'); subplot(2,3,4);imshow(geom3);title('m=0.1,v=0 恢复效果'); subplot(2,3,5);imshow(geom4);title('m=0.1,v=0.1 恢复效果'); subplot(2,3,6);imshow(geom5);title('m=0.2,v=0.1 恢复效果'); saveas(gcf,'gauss_geom.bmp');
+>> 
+>> %中值滤波
+>> medi1 = medfilt2(gaus1,[5,5],'symmetric');
+>> medi2 = medfilt2(gaus2,[5,5],'symmetric');
+>> medi3 = medfilt2(gaus3,[5,5],'symmetric');
+>> medi4 = medfilt2(gaus4,[5,5],'symmetric');
+>> medi5 = medfilt2(gaus5,[5,5],'symmetric');
+>> figure; subplot(2,3,1);imshow(lena);title('源图像'); subplot(2,3,2);imshow(medi1);title('m=0,v=0.1 恢复效果'); subplot(2,3,3);imshow(medi2);title('m=0,v=0.2 恢复效果'); subplot(2,3,4);imshow(medi3);title('m=0.1,v=0 恢复效果'); subplot(2,3,5);imshow(medi4);title('m=0.1,v=0.1 恢复效果'); subplot(2,3,6);imshow(medi5);title('m=0.2,v=0.1 恢复效果'); saveas(gcf,'gauss_medi.bmp');
+>> 
+>> %自适应滤波
+>> wien1 = wiener2(gaus1,[5,5]);
+>> wien2 = wiener2(gaus2,[5,5]);
+>> wien3 = wiener2(gaus3,[5,5]);
+>> wien4 = wiener2(gaus4,[5,5]);
+>> wien5 = wiener2(gaus5,[5,5]);
+>> figure; subplot(2,3,1);imshow(lena);title('源图像'); subplot(2,3,2);imshow(wien1);title('m=0,v=0.1 恢复效果'); subplot(2,3,3);imshow(wien2);title('m=0,v=0.2 恢复效果'); subplot(2,3,4);imshow(wien3);title('m=0.1,v=0 恢复效果'); subplot(2,3,5);imshow(wien4);title('m=0.1,v=0.1 恢复效果'); subplot(2,3,6);imshow(wien5);title('m=0.2,v=0.1 恢复效果'); saveas(gcf,'gauss_wien.bmp');
+>> 
+
+%2-椒盐噪声及恢复
+>> clear
+>> lena = im2double(imread('lena.bmp'));
+>> [l,w] = size(lena);
+>> r = rand(l,w);
+>> lena_pepp = lena; lena_salt = lena;
+>> lena_pepp(r<=0.1) = 0;
+>> lena_salt(r<=0.1) = 1;
+>> figure; subplot(1,3,1);imshow(lena);title('源图像'); subplot(1,3,2);imshow(lena_pepp);title('胡椒噪声'); subplot(1,3,3);imshow(lena_salt);title('盐粒噪声'); saveas(gcf,'pe&sa.bmp');
+>> %算术均值滤波
+>> aver1 = imfilter(lena_pepp,fspecial('average',[5,5]));
+>> aver2 = imfilter(lena_salt,fspecial('average',[5,5]));
+>> %几何均值滤波
+>> geom1 = real(exp(imfilter(log(lena_pepp+0.1),fspecial('average',[5,5]),'replicate')))-0.1;
+>> geom2 = real(exp(imfilter(log(lena_salt+0.1),fspecial('average',[5,5]),'replicate')))-0.1;
+>> %中值滤波
+>> medi1 = medfilt2(lena_pepp,[5,5],'symmetric');
+>> medi2 = medfilt2(lena_salt,[5,5],'symmetric');
+>> %自适应滤波
+>> wien1 = wiener2(lena_pepp,[5,5]);
+>> wien2 = wiener2(lena_salt,[5,5]);
+>> figure; subplot(2,4,1);imshow(aver1);title('aver_pepp'); subplot(2,4,2);imshow(geom1);title('geom_pepp'); subplot(2,4,3);imshow(medi1);title('medi_pepp'); subplot(2,4,4);imshow(wien1);title('wien_pepp');  subplot(2,4,5);imshow(aver2);title('aver_salt'); subplot(2,4,6);imshow(geom2);title('geom_salt'); subplot(2,4,7);imshow(medi2);title('medi_salt'); subplot(2,4,8);imshow(wien2);title('wien_salt'); saveas(gcf,'pe&sa_de.bmp');
+>>  
+>> %反谐波
+>> ihmf1 = ihmf(lena_pepp,5,1.5);
+>> ihmf2 = ihmf(lena_pepp,5,-1.5);
+>> ihmf3 = ihmf(lena_salt,5,1.5);
+>> ihmf4 = ihmf(lena_salt,5,-1.5);
+>> figure; subplot(2,2,1);imshow(ihmf1);title('posi_pepp'); subplot(2,2,2);imshow(ihmf2);title('nega_pepp'); subplot(2,2,3);imshow(ihmf3);title('posi_salt'); subplot(2,2,4);imshow(ihmf4);title('nega_salt');  saveas(gcf,'ihmf.bmp');
+>> 
+%ihmf
+function im_out=ihmf(im_in,l,a)
+    Q=a;
+    h=ones(l,l);
+    im_out=imfilter(im_in.^(Q+1),h,'replicate')./(eps+imfilter(im_in.^Q,h,'replicate'));
+end
+
+%3-维纳滤波器
+>> lena = im2double(imread('lena.bmp'));
+>> [l,w] = size(lena);
+>> %运动模糊
+>> F = fftshift(fft2(lena));
+>> T = 1; a = 0.1; b = 0.1;
+>> for i = 1:l
+    for j = 1:w
+        H(i,j) = (T/(pi*(i*a+j*b)))*sin(pi*(i*a+j*b))*exp(-sqrt(-1)*pi*(i*a+j*b));
+        G(i,j) = H(i,j)*F(i,j);
+    end
+end
+>> G = uint8(real(256.*ifft2(ifftshift(G))./max(max(ifft2(ifftshift(G))))));
+>> gaus = imnoise(G,'gaussian',0,0.01);
+>> figure; subplot(1,3,1);imshow(lena);title('源图像'); subplot(1,3,2);imshow(G);title('运动模糊'); subplot(1,3,3);imshow(gaus);title('高斯噪声'); saveas(gcf,'mblur.bmp');
+>> 
+>> H = fspecial('motion',50,45);
+>> blur1 = imfilter(lena,H,'circular','conv');
+>> blur2 = imnoise(blur1,'gaussian',0,0.01);
+>> nois = imnoise(zeros(size(lena)),'gaussian',0,0.01);
+>> noise = sum(nois(:).^2)/sum(im2double(lena(:)).^2);
+>> blur3 = deconvwnr(blur2,H,noise);
+>> pnoise = 0.0001*prod(size(lena));
+>> [mini,LAGRA] = deconvreg(blur1,H,pnoise);
+>> figure; subplot(2,2,1);imshow(blur1);title('45°模糊'); subplot(2,2,2);imshow(blur2);title('高斯噪声'); subplot(2,2,3);imshow(blur3);title('维纳滤波');subplot(2,2,4);imshow(G);title('约束最小二乘滤波'); saveas(gcf,'wien.bmp');
+>> 
